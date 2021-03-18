@@ -1,22 +1,22 @@
-  controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (wall_jumping_master.isHittingTile(CollisionDirection.Bottom)) {
-        wall_jumping_master.vy = -350
+scene.onHitWall(SpriteKind.Player, function (sprite, location) {
+    if (wall_jumping_master.isHittingTile(CollisionDirection.Bottom) && wall_jumping_master.vy > 250) {
+        info.changeLifeBy(-1)
+    }
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (wall_jumping_master.isHittingTile(CollisionDirection.Bottom) || wall_jumping_master.isHittingTile(CollisionDirection.Right) || wall_jumping_master.isHittingTile(CollisionDirection.Left)) {
+        wall_jumping_master.vy = -250
     }
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     wall_jumping_master.setImage(leftFacingImg)
 })
+scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.chestClosed, function (sprite, location) {
+    game.over(true)
+})
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     wall_jumping_master.setImage(rightFacingImg)
 })
-game.onUpdateInterval(500, function() {
-    if (wall_jumping_master.isHittingTile(CollisionDirection.Right)) {
-        wall_jumping_master.setImage(rightSwordOutImg)
-        wall_jumping_master.ay = 0
-        wall_jumping_master.vy = 20
-    } 
-})
-
 let wall_jumping_master: Sprite = null
 let leftFacingImg: Image = null
 let rightFacingImg: Image = null
@@ -95,6 +95,26 @@ leftFacingImg = img`
 wall_jumping_master = sprites.create(rightFacingImg, SpriteKind.Player)
 controller.moveSprite(wall_jumping_master, 100, 0)
 tiles.setTilemap(tilemap`level1`)
+info.setLife(3)
 scene.cameraFollowSprite(wall_jumping_master)
 tiles.placeOnTile(wall_jumping_master, tiles.getTileLocation(9, 31))
 wall_jumping_master.ay = 500
+game.onUpdateInterval(100, function () {
+    if (wall_jumping_master.isHittingTile(CollisionDirection.Right) && wall_jumping_master.vy > 0) {
+        wall_jumping_master.setImage(rightSwordOutImg)
+        wall_jumping_master.ay = 0
+        wall_jumping_master.vy = 20
+    } else if (wall_jumping_master.isHittingTile(CollisionDirection.Left) && wall_jumping_master.vy > 0) {
+        wall_jumping_master.setImage(leftSwordOutImg)
+        wall_jumping_master.ay = 0
+        wall_jumping_master.vy = 20
+    } else {
+        wall_jumping_master.ay = 350
+        if (wall_jumping_master.image == rightSwordOutImg) {
+            wall_jumping_master.setImage(rightFacingImg)
+        } else if (wall_jumping_master.image == leftSwordOutImg) {
+            wall_jumping_master.setImage(leftFacingImg)
+        }
+        wall_jumping_master.ay = 500
+    }
+})
